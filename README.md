@@ -1,4 +1,4 @@
-## Capture with background images
+## Captcha with background images
 
 ## Usage
 
