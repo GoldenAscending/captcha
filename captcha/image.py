@@ -35,13 +35,13 @@ for  i  in  range( 256 ):
     table.append( i * 1.97 )
   
 class _Captcha(object):
-    def generate(self, chars, format='png'):
+    def generate(self, chars, format='png', images=None):
         """Generate an Image Captcha of the given characters.
 
         :param chars: text to be generated.
         :param format: image file format
         """
-        im = self.generate_image(chars)
+        im = self.generate_image(chars, images=images)
         out = BytesIO()
         im.save(out, format=format)
         out.seek(0)
@@ -147,7 +147,7 @@ class ImageCaptcha(_Captcha):
             number -= 1
         return image
 
-    def create_captcha_image(self, chars, color, background):
+    def create_captcha_image(self, chars, color, background, images=None):
         """Create the CAPTCHA image itself.
 
         :param chars: text to be generated.
@@ -158,6 +158,14 @@ class ImageCaptcha(_Captcha):
         """
         image = Image.new('RGB', (self._width, self._height), background)
         draw = Draw(image)
+        
+        if type(images) is list:
+            w, h = image.size
+            for i, item in enumerate(images):
+                w1,h1 = item.size
+                x1 = random.randint(0, w - w1)
+                y1 = random.randint(0, h - h1)
+                image.paste(item, (x1, y1))
 
         def _draw_character(c):
             font = random.choice(self.truefonts)
@@ -212,14 +220,14 @@ class ImageCaptcha(_Captcha):
 
         return image
 
-    def generate_image(self, chars):
+    def generate_image(self, chars, images=None):
         """Generate the image of the given characters.
 
         :param chars: text to be generated.
         """
-        background = random_color(238, 255)
+        background = random_color(255, 255)
         color = random_color(0, 200, random.randint(220, 255))
-        im = self.create_captcha_image(chars, color, background)
+        im = self.create_captcha_image(chars, color, background, images=images)
         self.create_noise_dots(im, color)
         self.create_noise_curve(im, color)
         im = im.filter(ImageFilter.SMOOTH)
